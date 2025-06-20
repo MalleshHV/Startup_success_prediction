@@ -45,7 +45,7 @@ An AI-powered web application that predicts the success probability of startups 
 ## 📊 Dataset & Analysis
 
 ### Dataset Overview
-- **Source:** Startup ecosystem research data
+- **Source:** [Kaggle dataset link](https://www.kaggle.com/datasets/manishkc06/startup-success-prediction)
 - **Size:** 923 startup records
 - **Features:** 49 original features → 29 selected features
 - **Target:** Binary classification (Acquired vs Closed)
