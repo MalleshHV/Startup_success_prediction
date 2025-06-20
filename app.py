@@ -9,7 +9,6 @@ import numpy as np
 try:
     import joblib
     from sklearn.ensemble import RandomForestClassifier
-
     print("✅ All required libraries imported successfully")
 except ImportError as e:
     print(f"❌ Missing required library: {e}")
@@ -69,29 +68,25 @@ except:
 print(f"🤖 Model type: {model_type}")
 print(f"⚖️ Using scaler: {'Yes' if scaler else 'No'}")
 print(f"🎯 Using feature selection: {'Yes' if using_feature_selection else 'No'}")
-print("=" * 50)
+print("="*50)
 
 # Create Flask application instance (From your guide - Image 3)
 app = Flask(__name__)
-
 
 # Define route for homepage - Landing page (From your guide - Image 4)
 @app.route('/')
 def home():
     return render_template('home.html')
 
-
 # Define route for prediction form
 @app.route('/predict-form')
 def predict_form():
     return render_template('index.html')
 
-
 # Alternative route for prediction form (backward compatibility)
 @app.route('/index')
 def index():
     return render_template('index.html')
-
 
 # Define route for prediction (From your guide - Image 5)
 @app.route('/predict', methods=['POST'])
@@ -106,7 +101,7 @@ def predict():
     funding_total_usd = float(request.form['funding_total_usd'])
     milestones = float(request.form['milestones'])
     avg_participants = float(request.form['avg_participants'])
-
+    
     # Additional boolean/categorical features
     is_CA = int(request.form.get('is_CA', 0))
     is_NY = int(request.form.get('is_NY', 0))
@@ -119,38 +114,28 @@ def predict():
     has_roundC = int(request.form.get('has_roundC', 0))
     has_roundD = int(request.form.get('has_roundD', 0))
     is_top500 = int(request.form.get('is_top500', 0))
-
+    
     # Create feature array matching the exact model requirements
     if feature_names:
         # Create a full feature array with default values
         feature_dict = {}
-
+        
         # Set default values for all expected features
         for feature in feature_names:
             if feature == 'latitude':
                 # Default latitude based on state
-                if is_CA:
-                    feature_dict[feature] = 37.4419  # California
-                elif is_NY:
-                    feature_dict[feature] = 40.7128  # New York
-                elif is_MA:
-                    feature_dict[feature] = 42.3601  # Massachusetts
-                elif is_TX:
-                    feature_dict[feature] = 31.9686  # Texas
-                else:
-                    feature_dict[feature] = 39.8283  # US average
+                if is_CA: feature_dict[feature] = 37.4419  # California
+                elif is_NY: feature_dict[feature] = 40.7128  # New York
+                elif is_MA: feature_dict[feature] = 42.3601  # Massachusetts
+                elif is_TX: feature_dict[feature] = 31.9686  # Texas
+                else: feature_dict[feature] = 39.8283  # US average
             elif feature == 'longitude':
                 # Default longitude based on state
-                if is_CA:
-                    feature_dict[feature] = -122.1430  # California
-                elif is_NY:
-                    feature_dict[feature] = -74.0060  # New York
-                elif is_MA:
-                    feature_dict[feature] = -71.0589  # Massachusetts
-                elif is_TX:
-                    feature_dict[feature] = -99.9018  # Texas
-                else:
-                    feature_dict[feature] = -98.5795  # US average
+                if is_CA: feature_dict[feature] = -122.1430  # California
+                elif is_NY: feature_dict[feature] = -74.0060  # New York
+                elif is_MA: feature_dict[feature] = -71.0589  # Massachusetts
+                elif is_TX: feature_dict[feature] = -99.9018  # Texas
+                else: feature_dict[feature] = -98.5795  # US average
             elif feature == 'age_first_funding_year':
                 feature_dict[feature] = age_first_funding_year
             elif feature == 'age_last_funding_year':
@@ -201,20 +186,15 @@ def predict():
                 feature_dict[feature] = 13  # Default company age (2023 - 2010)
             elif feature in ['state', 'category', 'state_category']:
                 # Encoded categorical features
-                if is_CA:
-                    feature_dict[feature] = 0  # CA encoded as 0
-                elif is_NY:
-                    feature_dict[feature] = 1  # NY encoded as 1
-                elif is_MA:
-                    feature_dict[feature] = 2  # MA encoded as 2
-                elif is_TX:
-                    feature_dict[feature] = 3  # TX encoded as 3
-                else:
-                    feature_dict[feature] = 4  # Other encoded as 4
+                if is_CA: feature_dict[feature] = 0  # CA encoded as 0
+                elif is_NY: feature_dict[feature] = 1  # NY encoded as 1
+                elif is_MA: feature_dict[feature] = 2  # MA encoded as 2
+                elif is_TX: feature_dict[feature] = 3  # TX encoded as 3
+                else: feature_dict[feature] = 4  # Other encoded as 4
             else:
                 # Default value for any other features
                 feature_dict[feature] = 0
-
+        
         # Create input array in the correct order
         input_array = np.array([feature_dict[feature] for feature in feature_names]).reshape(1, -1)
     else:
@@ -230,21 +210,21 @@ def predict():
             2010, 0, 13,  # founded_year, state, company_age
             funding_total_usd / (funding_rounds + 1)  # funding_per_round
         ]).reshape(1, -1)
-
+    
     # Apply scaling if scaler is available
     if scaler is not None:
         input_array = scaler.transform(input_array)
-
+    
     # Make a prediction using the loaded model
     prediction = model.predict(input_array)[0]
-
+    
     # Get prediction probability for confidence
     try:
         prediction_proba = model.predict_proba(input_array)[0]
         confidence = max(prediction_proba) * 100
     except:
         confidence = 85.0  # Default confidence if probability not available
-
+    
     # Map the predicted label to a meaningful output
     if prediction == 1:
         result = 'Acquired'
@@ -254,7 +234,7 @@ def predict():
         result = 'Closed'
         result_class = 'danger'
         result_message = 'Higher risk of closure. Consider reviewing the business model and funding strategy.'
-
+    
     # Create input summary for display
     input_summary = {
         'Age First Funding (Years)': age_first_funding_year,
@@ -267,50 +247,44 @@ def predict():
         'Milestones': milestones,
         'Average Participants': avg_participants
     }
-
+    
     # Render the prediction result
-    return render_template('result.html',
-                           result=result,
-                           confidence=round(confidence, 1),
-                           result_class=result_class,
-                           result_message=result_message,
-                           input_data=input_summary)
-
+    return render_template('result.html', 
+                         result=result,
+                         confidence=round(confidence, 1),
+                         result_class=result_class,
+                         result_message=result_message,
+                         input_data=input_summary)
 
 # Additional routes for other pages mentioned in guide
 @app.route('/home')
 def home_page():
     return render_template('home.html')
 
-
 @app.route('/about')
 def about():
     return render_template('about.html')
-
 
 # Error handling
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template('404.html'), 404
 
-
 @app.errorhandler(500)
 def internal_server_error(e):
     return render_template('500.html'), 500
-
 
 # Main function (From your guide)
 if __name__ == '__main__':
     print("🚀 Starting Startup Prediction Flask Application...")
     print("📊 Model loaded successfully!")
-
-    # Get port from environment variable (for deployment) or use 5000 for local
+    
+    # Get port from environment variable (for Railway/Render deployment)
     import os
-
     port = int(os.environ.get('PORT', 5000))
-
-    print(f"🌐 Access the application at: http://localhost:{port}")
+    
+    print(f"🌐 Access the application at port: {port}")
     print("💡 Use Ctrl+C to stop the server")
-
-    # Run the Flask application
+    
+    # Run the Flask application (Railway compatible)
     app.run(debug=False, host='0.0.0.0', port=port)
