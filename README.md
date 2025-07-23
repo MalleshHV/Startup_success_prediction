@@ -5,7 +5,7 @@ An AI-powered web application that predicts the success probability of startups 
 
 ## 🌐 Live Demo
 
-**Try it now:** [Live Link](https://startupsuccessprediction-production.up.railway.app/)
+**Try it now:** [Live Link](https://startup-success-prediction-z0mh.onrender.com/)
 
 
 ## 📸 Screenshots
